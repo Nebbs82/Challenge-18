@@ -1,24 +1,42 @@
-import express from "express";
-import path from "node:path";
-import db from "./config/connection.js";
-import routes from "./routes/index.js";
+import express from 'express';
+import { ApolloServer } from 'apollo-server-express';
+import { typeDefs } from './schemas/typeDefs';
+import resolvers from './schemas/resolvers';
+import { authenticateToken } from './services/auth';
+import db from "./config/connection"
 
 const app = express();
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: ({ req }) => {
+    try {
+      const token = req.headers.authorization?.split(' ')[1];
+      const user = authenticateToken(token);
+
+      // attach the user object to the req as context
+      req.user = user;
+      
+      return req;
+    } catch(err) {
+      console.log(err);
+      return req;
+    }
+  },
+});
+
+await server.start()
+
+server.applyMiddleware({ app: app as any });
+
 const PORT = process.env.PORT || 3001;
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../../client/dist")));
-
-  app.get("*", (_req, res) => {
-    res.sendFile(path.join(__dirname, "../../client/dist/index.html"));
-  });
-}
-
-app.use(routes);
-
 db.once("open", () => {
-  app.listen(PORT, () => console.log(`🌍 Now listening on localhost:${PORT}`));
-});
+  app.listen(PORT, () => {
+    console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`);
+  }).on('error', (err) => {
+    console.error(`🚨 Error starting server: ${err.message}`);
+    process.exit(1);
+  });
+})

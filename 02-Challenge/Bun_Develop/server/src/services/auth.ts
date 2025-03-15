@@ -1,37 +1,32 @@
-import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-
 import dotenv from 'dotenv';
+
 dotenv.config();
 
 interface JwtPayload {
-  _id: unknown;
+  _id: string; 
   username: string;
-  email: string,
+  email: string;
 }
 
-export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
+// Function to verify the token
+export const authenticateToken = (token?: string) => {
+  if (!token) {
+    throw new Error('You must be logged in.'); 
+  }
 
-  if (authHeader) {
-    const token = authHeader.split(' ')[1];
-
-    const secretKey = process.env.JWT_SECRET_KEY || '';
-
-    jwt.verify(token, secretKey, (err, user) => {
-      if (err) {
-        return res.sendStatus(403); // Forbidden
-      }
-
-      req.user = user as JwtPayload;
-      return next();
-    });
-  } else {
-    res.sendStatus(401); // Unauthorized
+  const secretKey = process.env.JWT_SECRET_KEY || ''; 
+  try {
+    const user = jwt.verify(token, secretKey) as JwtPayload; 
+        
+    return user; 
+  } catch (err) {
+    throw new Error('Invalid token.'); 
   }
 };
 
-export const signToken = (username: string, email: string, _id: unknown) => {
+// Function to create a token
+export const signToken = (username: string, email: string, _id: string) => {
   const payload = { username, email, _id };
   const secretKey = process.env.JWT_SECRET_KEY || '';
 
