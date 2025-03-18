@@ -1,4 +1,5 @@
 # MERN Book Search Engine
+![Screenshot 2025-03-18 165632](https://github.com/user-attachments/assets/a764f490-9b14-435f-bc32-06e9c5ea912a)
 
 ## Description
 This is a fully functional book search engine built using the MERN stack, with a React front end, MongoDB database, and Node.js/Express.js server and API. The application allows users to search for books, save books to their account, and view their saved books.
@@ -43,7 +44,7 @@ The API uses GraphQL with Apollo Server. The available queries and mutations are
 The application is deployed to Render with a MongoDB database using MongoDB Atlas.
 
 ## License
-N/A
+MIT
 
 ## Contact
 
