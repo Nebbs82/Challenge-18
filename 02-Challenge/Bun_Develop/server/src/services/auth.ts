@@ -12,7 +12,7 @@ interface JwtPayload {
 // Function to verify the token
 export const authenticateToken = (token?: string) => {
   if (!token) {
-    throw new Error('You must be logged in.'); 
+    return null; 
   }
 
   const secretKey = process.env.JWT_SECRET_KEY || ''; 
@@ -21,7 +21,7 @@ export const authenticateToken = (token?: string) => {
         
     return user; 
   } catch (err) {
-    throw new Error('Invalid token.'); 
+    return null; 
   }
 };
 

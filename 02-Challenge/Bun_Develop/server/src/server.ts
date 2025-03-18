@@ -10,13 +10,17 @@ const app = express();
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  persistedQueries: false,
   context: ({ req }) => {
     try {
       const token = req.headers.authorization?.split(' ')[1];
       const user = authenticateToken(token);
-
+      console.log("Token:", token);
+      if(user){
+        req.user = user;
+      }
       // attach the user object to the req as context
-      req.user = user;
+      
       
       return req;
     } catch(err) {
@@ -30,7 +34,7 @@ await server.start()
 
 server.applyMiddleware({ app: app as any });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 4000;
 
 db.once("open", () => {
   app.listen(PORT, () => {
