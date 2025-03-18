@@ -4,6 +4,7 @@ import { typeDefs } from './schemas/typeDefs';
 import resolvers from './schemas/resolvers';
 import { authenticateToken } from './services/auth';
 import db from "./config/connection"
+import path from "node:path"
 
 const app = express();
 
@@ -37,6 +38,13 @@ server.applyMiddleware({ app: app as any });
 const PORT = process.env.PORT || 4000;
 
 db.once("open", () => {
+  if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../client/dist')));
+
+    app.get('*', (_req, res) => {
+      res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+    });
+  }
   app.listen(PORT, () => {
     console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`);
   }).on('error', (err) => {
